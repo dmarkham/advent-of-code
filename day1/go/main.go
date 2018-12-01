@@ -11,9 +11,13 @@ import (
 
 var seen map[int64]bool // keep track of values we have seen
 var sum = int64(0)      //running total
+var part2 bool
+
+func init() {
+	flag.BoolVar(&part2, "part2", false, "Run Part2?")
+}
 
 func main() {
-	var part2 = flag.Bool("part2", false, "run part2?")
 	flag.Parse()
 	seen = make(map[int64]bool)
 	seen[0] = true
@@ -21,14 +25,17 @@ func main() {
 	// in part 2 we run this until we hit a dup
 	for true {
 		for _, l := range lines {
-			foo(l)
+			processLine(l)
 		}
-		if !*part2 {
+		// walk it only once unless we are doing part2
+		if !part2 {
 			break
 		}
 	}
 	fmt.Println("SUM:", sum)
 }
+
+// Pull all lines into a string slice
 func readFileToLines(file string) []string {
 	// open data
 	fh, err := os.Open(file)
@@ -49,23 +56,12 @@ func readFileToLines(file string) []string {
 	}
 	return lines
 }
-func foo(line string) {
-	switch line[0] {
-	case '+':
-		//fmt.Println("ADD", line[1:])
-		v, err := strconv.ParseInt(string(line[1:]), 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		sum = sum + v
-	case '-':
-		//fmt.Println("Subtract: ", line[1:])
-		v, err := strconv.ParseInt(string(line[1:]), 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		sum = sum - v
+func processLine(line string) {
+	v, err := strconv.ParseInt(string(line), 10, 64)
+	if err != nil {
+		panic(err)
 	}
+	sum = sum + v
 	if seen[sum] {
 		fmt.Println("FIRST DUP:", sum)
 		os.Exit(0)
