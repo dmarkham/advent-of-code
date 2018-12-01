@@ -1,2 +1,2 @@
-# advent-of-code-2018
-Fun.
+# Advent of Code 2018
+Just having a little Fun.
