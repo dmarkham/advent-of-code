@@ -10,7 +10,7 @@ import (
 	"github.com/agnivade/levenshtein"
 )
 
-var sum = int64(0) //running total
+// https://adventofcode.com/2018/day/2
 var part2 bool
 
 func init() {

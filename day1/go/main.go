@@ -9,6 +9,8 @@ import (
 	"strconv"
 )
 
+// https://adventofcode.com/2018/day/1
+
 var seen map[int64]bool // keep track of values we have seen
 var sum = int64(0)      //running total
 var part2 bool
