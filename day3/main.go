@@ -11,9 +11,12 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-var size = 1000
+// https://adventofcode.com/2018/day/3
+
+var size = 1000 // Just guessed an arbitrary size
 
 func main() {
+
 	m := readFileToMatrix("data", nil)
 
 	r, c := m.Dims()
@@ -22,16 +25,19 @@ func main() {
 		for j := 0; j < c; j++ {
 			v := m.At(i, j)
 			if v >= 2 {
-				//fmt.Println(i, j, v)
-				good++
+				good++ // anything in this matrix >= 2 has a conflict
 			}
 		}
 	}
 
 	//fc := mat.Formatted(m, mat.Prefix("    "), mat.Squeeze())
 	//fmt.Printf("m = %v", fc)
-	fmt.Println(good)
-	_ = readFileToMatrix("data", m)
+
+	fmt.Println(good) // answer to part 1
+	// Then for part 2 We just feed thr matrix in again looking for an entire
+	// read in that was all 1's in the matrix
+	// it will print out the matrix ID when it finds it
+	readFileToMatrix("data", m)
 }
 
 // Pull all lines into a int slice
@@ -43,9 +49,10 @@ func readFileToMatrix(file string, second *mat.Dense) *mat.Dense {
 	defer fh.Close()
 	r := bufio.NewReader(fh)
 	scanner := bufio.NewScanner(r)
-	c := mat.NewDense(size, size, nil)
+	c := mat.NewDense(size, size, nil) // Will hold everything at the end and get returned
 	for scanner.Scan() {
 		ff := strings.Fields(scanner.Text())
+		// Parse the offest first
 		offset := strings.Split(strings.Replace(ff[2], ":", "", 1), ",")
 		oy, err := strconv.ParseInt(offset[0], 10, 64)
 		if err != nil {
@@ -55,7 +62,7 @@ func readFileToMatrix(file string, second *mat.Dense) *mat.Dense {
 		if err != nil {
 			panic(err)
 		}
-
+		// Now the deminsions
 		dim := strings.Split(ff[3], "x")
 		dy, err := strconv.ParseInt(dim[0], 10, 64)
 		if err != nil {
@@ -65,32 +72,25 @@ func readFileToMatrix(file string, second *mat.Dense) *mat.Dense {
 		if err != nil {
 			panic(err)
 		}
-		temp := mat.NewDense(size, size, nil)
-		isIT := true
+
+		isIT := true // used for part 2
 		for i := ox; i < ox+dx; i++ {
 			for j := oy; j < oy+dy; j++ {
-
 				if second != nil {
 					v := second.At(int(i), int(j))
-					if v != 1 {
+					if v != 1 { // it can not be the right id if it was conflicted
 						isIT = false
 					}
 				}
-				temp.Set(int(i), int(j), 1)
+				c.Set(int(i), int(j), 1+c.At(int(i), int(j))) // add them up
 			}
 		}
-		if isIT && second != nil {
+		if isIT && second != nil { // Found the part2 answer
 			fmt.Println(ff)
 		}
-		var foo mat.Dense
-		foo.Add(c, temp)
-
-		c = &foo
-		//fmt.Println(offset, dim)
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-
 	return c
 }
