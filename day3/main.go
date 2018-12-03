@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gonum.org/v1/gonum/floats"
+
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -18,18 +20,8 @@ var size = 1000 // Just guessed an arbitrary size
 func main() {
 
 	m := readFileToMatrix("data", nil)
-	r, c := m.Dims()
-	good := 0
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			v := m.At(i, j)
-			if v >= 2 {
-				good++ // anything in this matrix >= 2 has a conflict
-			}
-		}
-	}
-
-	fmt.Println(good) // answer to part 1
+	overlap := floats.Count(func(f float64) bool { return f >= 2 }, m.RawMatrix().Data) // anything in the matrix over 2
+	fmt.Println(overlap)                                                                // answer to part 1
 	// Then for part 2 We just feed thr matrix in again looking for an entire
 	// read in that was all 1's in the matrix
 	// it will print out the matrix ID when it finds it
