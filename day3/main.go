@@ -18,7 +18,6 @@ var size = 1000 // Just guessed an arbitrary size
 func main() {
 
 	m := readFileToMatrix("data", nil)
-
 	r, c := m.Dims()
 	good := 0
 	for i := 0; i < r; i++ {
@@ -29,9 +28,6 @@ func main() {
 			}
 		}
 	}
-
-	//fc := mat.Formatted(m, mat.Prefix("    "), mat.Squeeze())
-	//fmt.Printf("m = %v", fc)
 
 	fmt.Println(good) // answer to part 1
 	// Then for part 2 We just feed thr matrix in again looking for an entire
