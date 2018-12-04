@@ -30,23 +30,19 @@ func main() {
 	flag.Parse()
 
 	shifts := readFileToShifts("data")
-	mostAsleep := make(map[int]float64)
-	for _, s := range shifts {
-		if !s.Work {
-			mostAsleep[s.Guard] += s.Duration.Minutes()
-		}
-	}
-
 	gAsleepMost := 0
-	gmin := float64(0)
-
-	for k, v := range mostAsleep {
-		if v >= gmin {
-			gAsleepMost = k
-			gmin = v
+	if !part2 { // Part 1
+		mostAsleep := make(map[int]float64)
+		gmin := float64(0)
+		for _, s := range shifts {
+			if !s.Work {
+				mostAsleep[s.Guard] += s.Duration.Minutes()
+				if mostAsleep[s.Guard] >= gmin {
+					gAsleepMost = s.Guard
+					gmin = mostAsleep[s.Guard]
+				}
+			}
 		}
-	}
-	if !part2 {
 		fmt.Printf("Guard: %v, Sleep: %v\n", gAsleepMost, gmin)
 	}
 	hm := make(map[string]int)
@@ -64,12 +60,10 @@ func main() {
 		ss = append(ss, kv{k, v})
 	}
 
-	// Then sorting the slice by value, higher first.
-	sort.Slice(ss, func(i, j int) bool {
+	sort.Slice(ss, func(i, j int) bool { // Then sorting the slice by value, higher first.
 		return ss[i].Value > ss[j].Value
 	})
-	// Print the x top values
-	for _, kv := range ss[:1] {
+	for _, kv := range ss[:1] { // Print the x top values
 		fmt.Printf("Gaurd: %v    MinCount: %v\n", kv.Key, kv.Value)
 	}
 }
