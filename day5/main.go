@@ -42,7 +42,7 @@ func main() {
 		sort.Slice(ss, func(i, j int) bool { // Then sorting the slice by value, higher first.
 			return ss[i].Value < ss[j].Value
 		})
-		for _, kv := range ss[:10] { // Print the x top values
+		for _, kv := range ss[:1] { // Print the x top values
 			fmt.Printf("Type:: %v    MinCount: %v\n", kv.Key, kv.Value)
 		}
 

@@ -33,22 +33,26 @@ type Cord struct {
 func main() {
 	flag.Parse()
 	lines := readFileToLines("data")
-	rows := make([]float64, 0)
-	cols := make([]float64, 0)
 	cords := make([]*Cord, 0)
 	lineNumber := 0
+	maxRow := 0
+	maxCol := 0
 	for _, l := range lines {
 		ff := strings.Split(l, ", ")
 		col, err := strconv.ParseInt(ff[0], 10, 64)
 		if err != nil {
 			panic(err)
 		}
+		if int(col) > maxCol {
+			maxCol = int(col)
+		}
 		row, err := strconv.ParseInt(ff[1], 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		rows = append(rows, float64(row))
-		cols = append(cols, float64(col))
+		if int(row) > maxRow {
+			maxRow = int(row)
+		}
 		c := &Cord{
 			X:      int(row),
 			Y:      int(col),
@@ -57,25 +61,24 @@ func main() {
 		cords = append(cords, c)
 		lineNumber++
 	}
-	maxRow := floats.Max(rows) + 1
-	maxCol := floats.Max(cols) + 2
 	matrix := mat.NewDense(int(maxRow), int(maxCol), nil)
 	dimRows, dimCol := matrix.Dims()
 	part2Count := 0
 	for i := 0; i < dimRows; i++ {
 		for j := 0; j < dimCol; j++ {
-			minC := intergerDistance(i, j, cords)
-			if minC == nil {
-				matrix.Set(i, j, float64(99))
-			} else if minC.Score == 0 {
-				matrix.Set(i, j, float64(-1*minC.RowNum))
-			} else {
-				matrix.Set(i, j, float64(minC.RowNum))
-			}
 			if part2 {
-				tScore := intergerTotalDistance(i, j, cords)
+				tScore := intergerTotalDistance(i, j, cords) // just count
 				if tScore < 10000 {
 					part2Count++
+				}
+			} else {
+				minC := intergerDistance(i, j, cords)
+				if minC == nil {
+					matrix.Set(i, j, float64(lineNumber+1)) // tied 2 different ones
+				} else if minC.Score == 0 {
+					matrix.Set(i, j, float64(-1*minC.RowNum)) // isMinC
+				} else {
+					matrix.Set(i, j, float64(minC.RowNum)) // owned by minC
 				}
 			}
 		}
@@ -84,7 +87,7 @@ func main() {
 		fmt.Println("Part2 Count:", part2Count)
 		os.Exit(0)
 	}
-	seen := make(map[int]bool)
+	seen := make(map[int]bool) // used to exclude Cords on an edges
 	for i := 0; i < dimRows; i++ {
 		for j := 0; j < dimCol; j++ {
 			value := matrix.At(i, j)
@@ -95,7 +98,7 @@ func main() {
 		}
 	}
 	counts := make(map[int]int)
-	for _, v := range cords {
+	for _, v := range cords { // Count all the enclosed Cords
 		if seen[v.RowNum] {
 			continue
 		}
@@ -106,7 +109,6 @@ func main() {
 	for k, v := range counts {
 		ss = append(ss, kv{fmt.Sprintf("%v", k), v})
 	}
-
 	sort.Slice(ss, func(i, j int) bool {
 		return ss[i].Value > ss[j].Value
 	})
