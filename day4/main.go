@@ -12,7 +12,6 @@ import (
 )
 
 // https://adventofcode.com/2018/day/4
-var part2 bool
 
 type Shift struct {
 	Guard    int
@@ -21,6 +20,8 @@ type Shift struct {
 	Start    time.Time
 	End      time.Time
 }
+
+var part2 bool
 
 func init() {
 	flag.BoolVar(&part2, "part2", false, "Run Part2?")

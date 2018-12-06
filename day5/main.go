@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// https://adventofcode.com/2018/day/5
 var part2 bool
 
 func init() {
@@ -20,8 +21,7 @@ func main() {
 	flag.Parse()
 	lines := readFileToLines("data")
 	final := findPair([]rune(lines[0]), ' ')
-	//fmt.Println(string(final))
-	fmt.Println(len(final))
+	fmt.Println("Part1: ", len(final))
 
 	if part2 {
 		uniq := make(map[rune]bool)
@@ -51,7 +51,7 @@ func main() {
 }
 func findPair(rr []rune, without rune) []rune {
 	if without != ' ' {
-		t := string(rr)
+		t := string(rr) // simple prepwork in the case of part2
 		rU := strings.ToUpper(string(without))
 		rL := strings.ToLower(string(without))
 		t = strings.Replace(t, rU, "", -1)
@@ -60,23 +60,19 @@ func findPair(rr []rune, without rune) []rune {
 	}
 
 	for i := 0; i < len(rr)-1; i++ {
-		//fmt.Println(i, len(rr))
 		if isRuneOpposite(rr[i], rr[i+1]) {
-			//fmt.Println("MAtched: ", string(rr[i]), string(rr[i+1]))
-			rr = append(rr[:i], rr[i+2:]...)
+			rr = append(rr[:i], rr[i+2:]...) // remove the 2 that just matched
 			if i > 0 {
-				i = i - 2
+				i = i - 2 // can only move back2 when your above 0
 			} else {
-				i = -1
+				i = -1 //your at 0 the next time around
 			}
-		} else {
-			//fmt.Println("NO MATCH:", string(rr[i]), string(rr[i+1]))
 		}
 	}
 	return rr
 }
 
-func isRuneOpposite(r1, r2 rune) bool {
+func isRuneOpposite(r1, r2 rune) bool { // are they the case opposite?
 
 	switch strings.ToUpper(string(r1)) == string(r1) {
 	case true:
