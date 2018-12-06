@@ -67,12 +67,12 @@ func main() {
 	for i := 0; i < dimRows; i++ {
 		for j := 0; j < dimCol; j++ {
 			if part2 {
-				tScore := intergerTotalDistance(i, j, cords) // just count
+				tScore := TotalDistance(i, j, cords) // just count
 				if tScore < 10000 {
 					part2Count++
 				}
 			} else {
-				minC := intergerDistance(i, j, cords)
+				minC := BestCord(i, j, cords)
 				if minC == nil {
 					matrix.Set(i, j, float64(lineNumber+1)) // tied 2 different ones
 				} else if minC.Score == 0 {
@@ -117,7 +117,7 @@ func main() {
 	}
 }
 
-func intergerTotalDistance(x, y int, c []*Cord) float64 {
+func TotalDistance(x, y int, c []*Cord) float64 {
 	totalScore := float64(0)
 	for i := 0; i < len(c); i++ {
 		s := math.Abs(float64(x - c[i].X))
@@ -126,7 +126,7 @@ func intergerTotalDistance(x, y int, c []*Cord) float64 {
 	}
 	return totalScore
 }
-func intergerDistance(x, y int, c []*Cord) *Cord {
+func BestCord(x, y int, c []*Cord) *Cord {
 	min := math.MaxFloat64
 	var minCord *Cord
 	seen := make(map[float64]int)
@@ -136,7 +136,6 @@ func intergerDistance(x, y int, c []*Cord) *Cord {
 		s += math.Abs(float64(y - c[i].Y))
 		totalScore += min
 		if s <= min {
-			//fmt.Printf("I:%v, X:%v, Y:%v, X1:%v Y1:%v  Score:%v\n", i, x, y, c[i].X, c[i].Y, s)
 			minCord = c[i]
 			min = s
 			seen[min]++
