@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"runtime/pprof"
 	"strings"
-	"time"
 )
 
 var patterns map[string]string
@@ -31,9 +30,9 @@ func main() {
 	}
 
 	lines := readFileToLines("data")
-	generationsToDo := 20
+	generationsToDo := 50000000000
 	lastGeneration := ""
-	patterns = make(map[string]string)
+	//patterns = make(map[string]string)
 	lineStart := 0
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -48,64 +47,85 @@ func main() {
 			continue
 		}
 		if strings.Contains(line, "=>") {
-			parts := strings.Split(line, " => ")
-			patterns[parts[0]] = parts[1]
+			//parts := strings.Split(line, " => ")
+			//patterns[parts[0]] = parts[1]
 			continue
 
 		}
 	}
 
 	gen := 0
-	t := time.Now()
+	//t := time.Now()
 	for {
-		newGen := tick(lastGeneration)
-		newGen, lineStart = padGeneration(newGen, lineStart)
+		lastGeneration = tick(lastGeneration)
+		lastGeneration, lineStart = padGeneration(lastGeneration, lineStart)
 		//generations = append(generations, newGen)
-		lastGeneration = newGen
+		//lastGeneration = newGen
 		if gen == generationsToDo-1 {
 			break
 		}
-		if gen%100 == 0 {
-			taken := time.Since(t).Truncate(time.Second)
-			donePercent := float64(gen) / float64(generationsToDo)
-			fmt.Println("Generation:", gen, taken, donePercent)
+		if gen == 2010 {
+			diff := generationsToDo - 2 - gen
+			gen = gen + diff
+			lineStart = lineStart + diff
+		}
+		if gen == 19 {
+
+			fmt.Print("Gen:", gen, " ")
+			printTotal(lastGeneration, lineStart)
 		}
 		gen++
 
 	}
+	fmt.Print("Gen:", gen, " ")
+	printTotal(lastGeneration, lineStart)
+
+}
+
+func printTotal(s string, lineStart int) {
 
 	totalPots := 0
 	aORb := regexp.MustCompile("#")
-	matches := aORb.FindAllStringIndex(lastGeneration, -1)
+	matches := aORb.FindAllStringIndex(s, -1)
 	for _, match := range matches {
-		fmt.Println(lineStart, match[1], (lineStart + match[1] - 1))
+		//fmt.Println(s, match[1], (lineStart + match[1] - 1))
 		totalPots = totalPots + lineStart + match[1] - 1
 	}
+	fmt.Print(lineStart, s)
 	fmt.Println("totalPots:", totalPots)
+	return
 }
 
 func tick(s string) string {
-	newGen := s
-	for i := 0; i < len(s)-5; i++ {
+	n := len(s)
+	var b byte
+	buf := make([]byte, n)
+	copy(buf, s)
 
-		//foo := patterns[s[i:i+5]]
-		//if foo == "" {
-		//	foo = "."
-		//}
-		//fmt.Println(s)
-		//fmt.Println(i, foo)
-		//fmt.Println(newGen)
-		//fmt.Println(newGen[0:i+2], foo, newGen[i+3:])
-		newGen = newGen[0:i+2] + patterns[s[i:i+5]] + newGen[i+3:]
-		//fmt.Println(newGen)
-		//fmt.Println("")
+	for i := 0; i < n-5; i++ {
+
+		switch s[i : i+5] {
+		case ".#...":
+			b = '#'
+		case "...##", "#.#.#", ".###.", ".#..#", "#..#.", "###..", ".####", "#..##", "##.##", ".#.##", "##...", "##..#", "#.##.":
+			b = '#'
+		default:
+			b = '.'
+
+		}
+		buf[i+2] = b
 	}
-	//fmt.Println("GEN DONE")
-	return newGen
+	return string(buf)
 }
 
 func padGeneration(s string, lineStart int) (string, int) {
 
+	index := strings.Index(s, "#")
+
+	if index > 3 {
+		s = s[index-4:]
+		lineStart = lineStart + index - 4
+	}
 	if s[0] == '#' {
 		s = "...." + s
 		lineStart = lineStart - 4
@@ -129,6 +149,7 @@ func padGeneration(s string, lineStart int) (string, int) {
 	} else if s[len(s)-4] == '#' {
 		s = s + "."
 	}
+
 	return s, lineStart
 }
 
