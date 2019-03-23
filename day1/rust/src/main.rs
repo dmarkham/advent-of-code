@@ -1,21 +1,13 @@
 use std::collections::HashSet;
-use std::fs::File;
-use std::io;
-use std::io::*;
 use std::vec::Vec;
 
-fn main() -> io::Result<()> {
-    let f = &File::open("data")?;
-    let buf = BufReader::new(f);
-    let nums: Vec<i64> = buf
-        .lines()
-        .map(|line| {
-            line.unwrap()
-                .trim()
-                .parse::<i64>()
-                .expect("Wanted a number")
-        })
-        .collect();
+fn main() {
+    let puzzle = include_str!("data");
+    let nums = puzzle
+        .split_whitespace()
+        .map(|c| c.parse::<i64>().unwrap())
+        .collect::<Vec<_>>();
+
     let total: i64 = nums.iter().sum();
     println!("{:?}", total);
 
@@ -35,5 +27,4 @@ fn main() -> io::Result<()> {
             seen.insert(element);
         }
     }
-    Ok(())
 }
