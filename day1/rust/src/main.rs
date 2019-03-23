@@ -18,6 +18,7 @@ fn main() {
     });
 
     let mut seen = HashSet::new();
+    seen.insert(0);
     for element in f {
         //println!("the value is: {}", element);
         if seen.contains(&element) {
