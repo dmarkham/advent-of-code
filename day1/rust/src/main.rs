@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io;
 use std::io::*;
@@ -25,18 +25,15 @@ fn main() -> io::Result<()> {
         Some(*state)
     });
 
-    let mut seen = HashMap::new();
+    let mut seen = HashSet::new();
     for element in f {
         //println!("the value is: {}", element);
-        match seen.get(&element) {
-            Some(_) => {
-                println!("First Dup:{}", element);
-                break;
-            }
-            None => {
-                seen.insert(element, true);
-            }
-        };
+        if seen.contains(&element) {
+            println!("First Dup:{}", element);
+            break;
+        } else {
+            seen.insert(element);
+        }
     }
     Ok(())
 }

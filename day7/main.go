@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"flag"
 	"fmt"
 	"log"
@@ -18,10 +19,8 @@ var part2 bool
 func init() {
 	flag.BoolVar(&part2, "part2", false, "Run Part2?")
 }
-
-func main() {
-	flag.Parse()
-	lines := readFileToLines("data")
+func fileToDag(file string) *dag.DAG {
+	lines := readFileToLines(file)
 	d := dag.NewDAG()
 	seen := make(map[string]*dag.Vertex)
 	for _, l := range lines {
@@ -43,23 +42,130 @@ func main() {
 		d.AddEdge(v1, v2)
 
 	}
-	fmt.Println(d)
+	return d
+}
 
+type Worker struct {
+	WorkerID  int
+	busyUntil int
+	index     int // The index of the item in the heap.
+}
+type PriorityQueue []*Worker
+
+func (pq PriorityQueue) Len() int { return len(pq) }
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].busyUntil < pq[j].busyUntil
+
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(x interface{}) {
+	*pq = append(*pq, x.(*Worker))
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	//item.index = -1 // for safety
+	*pq = old[0 : n-1]
+	return item
+}
+
+func main() {
+	flag.Parse()
+	d := fileToDag("data")
+	fmt.Println(d)
 	finalList := make([]*dag.Vertex, 0)
 	starts := d.SourceVertices()
 	sort.Sort(byID(starts))
+	secondsPassed := 0
+	availableWorkers := 2
+	baseSeconds := 0
+	_ = availableWorkers
+	_ = baseSeconds
+	workerQueue := make(PriorityQueue, 0)
+	for i := 0; i < availableWorkers; i++ {
+		workerQueue = append(workerQueue,
+			&Worker{WorkerID: i},
+		)
+	}
 
+	heap.Init(&workerQueue)
+
+	//working := 0
+	seen := make(map[string]bool)
+	//round := 0
+	//minStartthisRound := math.MaxInt64
 	for true {
 
 		if len(starts) < 1 {
 			break
 		}
+
+		fmt.Println("Starts: ", starts)
+		smallest := 0
+		vals := make([]int, 0)
+		for i := 0; i < len(starts); i++ {
+			v := starts[i]
+			worktime := baseSeconds + int(starts[i].ID[0]-64)
+			if !seen[starts[i].ID] {
+				seen[starts[i].ID] = true
+				// Count work for V
+				w := heap.Pop(&workerQueue).(*Worker)
+				fmt.Println("V :", v.ID)
+				fmt.Println("Popped:", w.WorkerID, w.busyUntil)
+				if secondsPassed < w.busyUntil {
+					log.Fatalf("TooSoon %v < %v\n", secondsPassed, w.busyUntil)
+				}
+				w.busyUntil = secondsPassed + worktime
+				if secondsPassed == 0 {
+					smallest = w.busyUntil
+
+				} else if w.busyUntil < secondsPassed {
+					smallest = w.busyUntil
+				} else {
+					//smallest = w.busyUntil
+				}
+				if smallest > secondsPassed {
+					secondsPassed = smallest
+				}
+				vals = append(vals, w.WorkerID)
+				fmt.Println("Pushed:", w.WorkerID, w.busyUntil, secondsPassed)
+				heap.Push(&workerQueue, w)
+			}
+			if len(vals) > 0 {
+				// of the ID used/ use the smallest busyUntill
+				secondsPassed = vals[0]
+
+			}
+		}
+		/*
+			smallest := math.MaxInt64
+			for _, w := range workerQueue {
+				if w.busyUntil < smallest {
+					smallest = w.busyUntil
+				}
+			}
+			secondsPassed = smallest
+		*/
+		fmt.Println("SecondsPast: ", secondsPassed)
 		v := starts[0]
 		starts = starts[1:]
-		//fmt.Println("Node: ", v)
 		kids, _ := d.Successors(v)
 		sort.Sort(byID(kids))
 		finalList = append(finalList, v)
+
+		/*
+			for workerQueue.Len() > 0 {
+				w := heap.Pop(&workerQueue).(*Worker)
+				fmt.Println("Popped:", w.V.ID, w.WorkerID, w.started, w.workSeconds, secondsPassed)
+			}
+		*/
 		for _, k := range kids {
 			//fmt.Println("  Kids", k)
 			v.Children.Remove(k)
@@ -71,11 +177,13 @@ func main() {
 
 		}
 	}
-	fmt.Println("Final")
+	fmt.Println("Part1 : ")
 	for _, v := range finalList {
 		fmt.Print(v.ID)
 	}
 	fmt.Println("")
+	fmt.Println("Part2 : Seconds ", secondsPassed)
+
 	os.Exit(0)
 }
 
