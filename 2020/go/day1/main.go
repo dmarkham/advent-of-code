@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strconv"
 )
@@ -16,24 +15,13 @@ func init() {
 	flag.BoolVar(&part2, "part2", false, "Run Part2?")
 }
 
-type Result struct {
-	SomeValue float64
-}
-
 func main() {
 	flag.Parse()
 	lines := readFileToLines("data.txt")
-	// in part 2 we run this until we hit a dup
-	for true {
 
-		sum := 0.0
-		for _, l := range lines {
-			r := processLine(l)
-			sum = sum + r.SomeValue
-		}
-		fmt.Println(int(sum))
-		os.Exit(0)
-	}
+	list := subsetSum(lines, 2020, nil)
+	fmt.Println(list)
+	fmt.Println(int(product(list)))
 }
 
 // Pull all lines into a string slice
@@ -57,36 +45,55 @@ func readFileToLines(file string) []string {
 	}
 	return lines
 }
-func processLine(line string) *Result {
-	value, err := strconv.ParseFloat(line, 64)
-	if err != nil {
-		panic(err)
+
+func subsetSum(numbers []string, target float64, partial []string) []string {
+	s := sum(partial)
+	match := 2
+	if part2 {
+		match = 3
 	}
 
-	if !part2 {
-		v := calcFuel(value)
-		fmt.Println(line, "-> ", v)
-		return &Result{SomeValue: v}
+	if s == target && len(partial) == match {
+		return partial
+	}
+	if s > target {
+		return nil
 	}
 
-	totalForModule := 0.0
-	for {
-		v := calcFuel(value)
-		totalForModule = totalForModule + v
-		if v > 0 {
-			value = v
-		} else {
-			break
+	for i := range numbers {
+		n := numbers[i]
+		r := subsetSum(numbers[i+1:], target, append(partial, n))
+		if r != nil {
+			return r
 		}
 	}
-	return &Result{SomeValue: totalForModule}
+	return nil
+}
+func sum(list []string) float64 {
+	sum := 0.0
+	for _, part := range list {
+		cm, err := strconv.ParseFloat(part, 64)
+		if err != nil {
+			panic(err)
+		}
+		sum = sum + cm
+	}
+	return sum
 }
 
-func calcFuel(value float64) float64 {
-	v := math.Floor(value/3) - 2
-	if v < 0 {
-		v = 0
+func product(list []string) float64 {
+	p := 0.0
+	for _, part := range list {
+		cm, err := strconv.ParseFloat(part, 64)
+		if err != nil {
+			panic(err)
+		}
+		if p == 0 {
+			p = cm
+		} else {
+			p = p * cm
+		}
+		fmt.Println(part, int(p))
 	}
-	fmt.Println(value, "-> ", v)
-	return v
+	return p
 }
