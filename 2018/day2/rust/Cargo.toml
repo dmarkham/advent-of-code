@@ -1,0 +1,9 @@
+[package]
+name = "rust"
+version = "0.1.0"
+authors = ["Dan Markham <dmarkham@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+itertools = "0.8.0"
+edit-distance = "2.1.0"
