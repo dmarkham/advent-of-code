@@ -21,7 +21,6 @@ func main() {
 
 	list := subsetSum(lines, 2020, nil)
 	fmt.Println(list)
-	fmt.Println(int(product(list)))
 }
 
 // Pull all lines into a string slice
@@ -79,21 +78,4 @@ func sum(list []string) float64 {
 		sum = sum + cm
 	}
 	return sum
-}
-
-func product(list []string) float64 {
-	p := 0.0
-	for _, part := range list {
-		cm, err := strconv.ParseFloat(part, 64)
-		if err != nil {
-			panic(err)
-		}
-		if p == 0 {
-			p = cm
-		} else {
-			p = p * cm
-		}
-		fmt.Println(part, int(p))
-	}
-	return p
 }
