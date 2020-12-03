@@ -9,7 +9,6 @@ import (
 )
 
 var part2 bool
-var size = 1000 // Just guessed an arbitrary size
 
 func init() {
 	flag.BoolVar(&part2, "part2", false, "Run Part2?")
