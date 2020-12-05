@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -124,14 +125,16 @@ func readFileToLines(file string) []*Passport {
 	defer fh.Close()
 	r := bufio.NewReader(fh)
 	scanner := bufio.NewScanner(r)
+	scanner.Split(Paragraph)
 	// read it all in
 
 	passports := make([]*Passport, 0)
 	passport := &Passport{}
 	for scanner.Scan() {
 		line := scanner.Text()
-		line = strings.TrimSpace(line)
-		//fmt.Println(line)
+		//line = strings.TrimSpace(line)
+		fmt.Println(line)
+		continue
 		parts := strings.Fields(line)
 		if line == "" {
 			passports = append(passports, passport)
@@ -177,4 +180,49 @@ func mustParseInt(s string) int {
 		log.Fatalf("cannot convert string %s to integer: %v", s, err)
 	}
 	return i
+}
+
+func Paragraph(data []byte, atEOF bool) (advance int, token []byte, err error) {
+
+	// Return nothing if at end of file and no data passed
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+
+	// Find the index of the input of the separator substring
+	if i := strings.Index(string(data), "\n\n"); i >= 0 {
+		return i + len("\n\n"), bytes.ReplaceAll(data[0:i], []byte{'\n'}, []byte{' '}), nil
+	}
+
+	// If at end of file with data return the data
+	if atEOF {
+		return len(data), bytes.ReplaceAll(data, []byte{'\n'}, []byte{' '}), nil
+	}
+
+	return
+}
+
+// SplitAt returns a bufio.SplitFunc closure, splitting at a substring
+// scanner.Split(SplitAt("\n# "))
+func SplitAt(substring string) func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+
+	return func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+
+		// Return nothing if at end of file and no data passed
+		if atEOF && len(data) == 0 {
+			return 0, nil, nil
+		}
+
+		// Find the index of the input of the separator substring
+		if i := strings.Index(string(data), substring); i >= 0 {
+			return i + len(substring), data[0:i], nil
+		}
+
+		// If at end of file with data return the data
+		if atEOF {
+			return len(data), data, nil
+		}
+
+		return
+	}
 }
