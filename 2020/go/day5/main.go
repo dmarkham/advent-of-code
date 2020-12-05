@@ -82,10 +82,10 @@ func main() {
 	for _, s := range seats {
 		//fmt.Println(s, last)
 		if last != s {
-			fmt.Println("YOUR SEAT:", s)
+			fmt.Println("YOUR SEAT:", s-1)
 			last = s
 		} else {
-			fmt.Println(s, last)
+			//fmt.Println(s, last)
 
 		}
 		last++
